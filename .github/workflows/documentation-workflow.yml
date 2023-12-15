@@ -1,6 +1,9 @@
 name: Documentation Generation
 
 on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]  # or any other branch you want to target
   pull_request:
     branches: [ main ]  # or any other branch you want to target
 
@@ -22,14 +25,23 @@ jobs:
         python -m pip install --upgrade pip
         pip install openai GitPython
 
-    - name: Get list of changed files
+    - name: Get changed files
       id: files
       run: |
-        echo "CHANGED_FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }})" >> $GITHUB_ENV
+        echo "::set-output name=list::$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }})"
 
-
-    - name: Run documentation script
-      env:
-        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+    - name: Print changed files
       run: |
-        python .github/scripts/generate_documentation.py
+        echo "Changed files: ${{ steps.files.outputs.list }}"
+
+    # - name: Get list of changed files
+    #   id: files
+    #   run: |
+    #     echo "CHANGED_FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }})" >> $GITHUB_ENV
+
+
+    # - name: Run documentation script
+    #   env:
+    #     OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+    #   run: |
+    #     python .github/scripts/generate_documentation.py
