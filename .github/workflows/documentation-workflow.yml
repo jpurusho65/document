@@ -28,11 +28,9 @@ jobs:
     - name: Get changed files
       id: files
       run: |
-        echo "::set-output name=list::$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }})"
-
-    - name: Print changed files
-      run: |
-        echo "Changed files: ${{ steps.files.outputs.list }}"
+        git fetch origin ${{ github.base_ref }}
+        echo "Changed files:"
+        git diff --name-only origin/${{ github.base_ref }} ${{ github.event.pull_request.head.sha }}
 
     # - name: Get list of changed files
     #   id: files
