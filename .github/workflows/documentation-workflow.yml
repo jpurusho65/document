@@ -40,5 +40,4 @@ jobs:
         run: |
           echo '${{ steps.changed-files.outputs.files}}'
           echo '${{ steps.changed-files.outputs.files_modified}}'
-          echo '${{ steps.changed-files.outputs.src_all_changed_files}}'
-          python .github/scripts/generate_documentation.py --files ${{ steps.changed-files.outputs.src_all_changed_files }}
+          python .github/scripts/generate_documentation.py --files ${{ steps.changed-files.outputs.files_modified }}
