@@ -12,34 +12,35 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
+      - name: Checkout repository
+        uses: actions/checkout@v2
 
-    - name: Set up Python 3.x
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.x' 
+      - name: Set up Python 3.x
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x' 
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install openai GitPython
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install openai GitPython
 
-    - name: Get changed files
-      id: files
-      run: |
-        git fetch origin ${{ github.base_ref }}
-        echo "Changed files:"
-        git diff --name-only origin/${{ github.base_ref }} ${{ github.event.pull_request.head.sha }}
+      - id: file_changes
+        uses: trilom/file-changes-action@v1.2.3
+      - name: changed_files
+        run: |
+          cat $HOME/files.json
+          cat $HOME/files_modified.json
+          cat $HOME/files_added.json
+          cat $HOME/files_removed.json
+          echo '${{ steps.file_changes.outputs.files}}'
+          echo '${{ steps.file_changes.outputs.files_modified}}'
+          echo '${{ steps.file_changes.outputs.files_added}}'
+          echo '${{ steps.file_changes.outputs.files_removed}}'
 
-    # - name: Get list of changed files
-    #   id: files
-    #   run: |
-    #     echo "CHANGED_FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }})" >> $GITHUB_ENV
 
-
-    # - name: Run documentation script
-    #   env:
-    #     OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-    #   run: |
-    #     python .github/scripts/generate_documentation.py
+      # - name: Run documentation script
+      #   env:
+      #     OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      #   run: |
+      #     python .github/scripts/generate_documentation.py
