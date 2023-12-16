@@ -23,10 +23,7 @@ def main(changed_files):
             docs[file_path] = generate_documentation(file_path)
     return docs
 
-if __name__ == "__main__":
-    changed_files = os.getenv('CHANGED_FILES').strip().split('\n')
-    documentation = main(changed_files)
-
+def git_commit(documentation):
     # Set up Git operations
     repo = Repo('.')
     git = repo.git
@@ -47,3 +44,9 @@ if __name__ == "__main__":
     git.config('user.name', 'GitHub Action')
     git.commit('-m', 'Update documentation')
     git.push('--set-upstream', 'origin', new_branch)
+    
+
+if __name__ == "__main__":
+    changed_files = os.getenv('CHANGED_FILES').strip().split('\n')
+    #documentation = main(changed_files)
+    print(f"Changed files: {changed_files}")
