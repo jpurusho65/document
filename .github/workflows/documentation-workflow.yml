@@ -32,14 +32,12 @@ jobs:
         id: changed-files
         uses: trilom/file-changes-action@v1.2.3
         with:
-          files: |
-            src:
-              - src/**
+          files: src/**
 
       - name: Run documentation script
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        if: steps.changed-files.outputs.src_any_changed == 'true'
+        if: steps.changed-files.outputs.any_changed == 'true'
         run: |
           echo '${{ steps.changed-files.outputs.files}}'
           echo '${{ steps.changed-files.outputs.files_modified}}'
