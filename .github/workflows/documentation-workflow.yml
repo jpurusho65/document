@@ -41,4 +41,7 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         if: steps.changed-files.outputs.src_any_changed == 'true'
         run: |
+          echo '${{ steps.changed-files.outputs.files}}'
+          echo '${{ steps.changed-files.outputs.files_modified}}'
+          echo '${{ steps.changed-files.outputs.src_all_changed_files}}'
           python .github/scripts/generate_documentation.py --files ${{ steps.changed-files.outputs.src_all_changed_files }}
