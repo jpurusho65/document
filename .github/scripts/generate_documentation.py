@@ -1,5 +1,6 @@
 import os
 import openai
+import argparse
 from git import Repo
 
 def generate_documentation(file_path):
@@ -46,8 +47,13 @@ def git_commit(documentation):
     git.push('--set-upstream', 'origin', new_branch)
     
 
+# Command line argument parsing
+parser = argparse.ArgumentParser(description="Generate Documentation")
+parser.add_argument("--files", nargs='*', help="List of changed files")
+args = parser.parse_args()
+
 if __name__ == "__main__":
-    changed_files = os.getenv('CHANGED_FILES', "")
+    changed_files = args.files
     openai_key = os.getenv("OPENAI_API_KEY", "")
     #documentation = main(changed_files)
     print(f"Changed files: {changed_files}, openai_key: {openai_key}")

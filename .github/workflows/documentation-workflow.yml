@@ -28,22 +28,17 @@ jobs:
           python -m pip install --upgrade pip
           pip install openai GitPython
 
-      - id: file_changes
+      - name: Get all source files that have changed
+        id: file_changes
         uses: trilom/file-changes-action@v1.2.3
-      - name: changed_files
-        run: |
-          cat $HOME/files.json
-          cat $HOME/files_modified.json
-          cat $HOME/files_added.json
-          cat $HOME/files_removed.json
-          echo '${{ steps.file_changes.outputs.files}}'
-          echo '${{ steps.file_changes.outputs.files_modified}}'
-          echo '${{ steps.file_changes.outputs.files_added}}'
-          echo '${{ steps.file_changes.outputs.files_removed}}'
-
+        with:
+          files: |
+            src:
+              - src/**
 
       - name: Run documentation script
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        if: steps.file_changes.outputs.src_any_changed == 'true'
         run: |
-          python .github/scripts/generate_documentation.py
+          python .github/scripts/generate_documentation.py --files ${{ steps.file_changes.outputs.src_all_changed_files }}
