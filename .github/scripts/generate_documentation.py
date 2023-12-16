@@ -47,6 +47,7 @@ def git_commit(documentation):
     
 
 if __name__ == "__main__":
-    changed_files = os.getenv('CHANGED_FILES').strip().split('\n')
+    changed_files = os.getenv('CHANGED_FILES', "")
+    openai_key = os.getenv("OPENAI_API_KEY", "")
     #documentation = main(changed_files)
-    print(f"Changed files: {changed_files}")
+    print(f"Changed files: {changed_files}, openai_key: {openai_key}")
