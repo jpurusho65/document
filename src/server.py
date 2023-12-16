@@ -37,6 +37,7 @@ def main():
     uvicorn.run("server:app", host="0.0.0.0", port=8000, log_level="info", reload=True)
 
 # You can run this server using `uvicorn server:app --reload`
+# Test this server file
 
 if __name__ == '__main__':
     main()
