@@ -1,27 +1,38 @@
 import os
-import openai
+import json
+from openai import OpenAI
+
 import argparse
 from git import Repo
 
-def generate_documentation(file_path):
+def generate_documentation(client, file_path):
     # Load file content
     with open(file_path, 'r') as file:
         content = file.read()
 
-    # Generate documentation using OpenAI GPT-4
-    response = openai.Completion.create(
-        engine="gpt-4",  # GPT-4 model
-        prompt=f"Generate detailed documentation for the following code:\n\n{content}\n",
-        max_tokens=1024,
-        api_key=os.environ['OPENAI_API_KEY']
-    )
-    return response.choices[0].text
+    prompt = """
+    You are a programming assistant designed to generate documentation for program source code.
+    Analyze the document step by step. Generate detailed in line documentation for the methods.
+    Ensure all method parameters, its type, return type are documented. Also generate class level
+    documentation where applicable. Output only the documented code and nothing else.
+    """
 
-def main(changed_files):
+    # Generate documentation using OpenAI GPT-4
+    response = client.chat.completions.create(
+                        model="gpt-4",
+                        messages=[
+                            {"role": "system", "content": f"{prompt}"},
+                            {"role": "user", "content": f"{content}"}
+                        ],
+                        max_tokens=1024
+                        )
+    return response.choices[0].message.content
+
+def handle_changed_files(client, changed_files):
     docs = {}
     for file_path in changed_files:
         if os.path.isfile(file_path):
-            docs[file_path] = generate_documentation(file_path)
+            docs[file_path] = generate_documentation(client, file_path)
     return docs
 
 def git_commit(documentation):
@@ -35,7 +46,7 @@ def git_commit(documentation):
 
     # Commit and push documentation
     for file_path, doc in documentation.items():
-        doc_file_path = f"{file_path}.md"  # Assuming markdown format for docs
+        doc_file_path = f"{file_path}"  # Assuming markdown format for docs
         with open(doc_file_path, 'w') as file:
             file.write(doc)
 
@@ -53,7 +64,8 @@ parser.add_argument("--files", nargs='*', help="List of changed files")
 args = parser.parse_args()
 
 if __name__ == "__main__":
+    client = OpenAI()
+    client.api_key=os.environ['OPENAI_API_KEY']
     changed_files = args.files
-    openai_key = os.getenv("OPENAI_API_KEY", "")
-    #documentation = main(changed_files)
-    print(f"Changed files: {changed_files}, openai_key: {openai_key}")
+    documentation = handle_changed_files(client, changed_files)
+    git_commit(documentation)
