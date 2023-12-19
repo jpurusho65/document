@@ -3,7 +3,7 @@ from openai import OpenAI
 import random
 
 import argparse
-from git import Repo
+from git import Repo, GitCommandError
 
 def generate_documentation(client, file_path):
     # Load file content
@@ -13,8 +13,10 @@ def generate_documentation(client, file_path):
     prompt = """
     You are a programming assistant designed to generate documentation for program source code.
     Analyze the document step by step. Generate detailed in line documentation for the methods.
-    Ensure all method parameters, its type, return type are documented. Also generate class level
-    documentation where applicable. Output only the documented code and nothing else.
+    Ensure all method parameters, their types, and return types are documented. Also generate class-level
+    documentation where applicable. The output must only include the documented code and no other text. 
+    Do not add any warnings, usage notes, additional note or comments that are not part of the original
+    code's functionality.  The final output must be syntactically correct functional code.
     """
 
     # Generate documentation using OpenAI GPT-4
@@ -23,8 +25,7 @@ def generate_documentation(client, file_path):
                         messages=[
                             {"role": "system", "content": f"{prompt}"},
                             {"role": "user", "content": f"{content}"}
-                        ],
-                        max_tokens=1024
+                        ]
                         )
     return response.choices[0].message.content
 
@@ -61,23 +62,46 @@ def git_commit(documentation):
     repo = Repo('.')
     git = repo.git
 
-    # Create a new branch
-    b_id = random.randint(1, 1000)
-    new_branch = f"docs-update-{b_id}"
-    git.checkout('HEAD', b=new_branch)
+    # Generate a unique branch name
+    #b_id = random.randint(1, 1000)
+    #new_branch = f"docs-update-{b_id}"
+    new_branch = "docs-update"
 
+    # Check if the branch already exists
+    try:
+        git.checkout(new_branch)
+    except GitCommandError:
+        # If the branch does not exist, create and checkout the branch
+        git.checkout('HEAD', b=new_branch)
+
+    modified_files = []
     # Commit and push documentation
     for file_path, doc in documentation.items():
-        doc_file_path = f"{file_path}"  # Assuming markdown format for docs
+        doc_file_path = file_path  # Assuming markdown format for docs
         with open(doc_file_path, 'w') as file:
             file.write(doc)
 
         git.add(doc_file_path)
+        modified_files.append(doc_file_path)
 
+    # Configure user details for commit
     git.config('user.email', 'action@github.com')
     git.config('user.name', 'GitHub Action')
-    git.commit('-m', 'Update documentation')
-    git.push('--set-upstream', 'origin', new_branch)
+
+    # Commit message
+    commit_message = f"""
+        {new_branch} - Updated Documentation\n
+        This is an automatic APIOverflow assistent generated documentation
+        The following files were modified:
+        ${modified_files}
+        """
+
+    git.commit('-m', commit_message)
+
+    #try:
+    #    git.push('--set-upstream', 'origin', new_branch)
+    #except GitCommandError as e:
+    #    print(f"Error pushing to remote: {e}") 
     
 
 # Command line argument parsing
