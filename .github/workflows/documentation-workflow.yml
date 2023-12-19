@@ -3,6 +3,8 @@ name: Documentation Generation
 on:
   workflow_dispatch:
   push:
+    paths:
+      - src/**
     branches: [ main ]  # or any other branch you want to target
   pull_request:
     branches: [ main ]  # or any other branch you want to target
@@ -31,8 +33,6 @@ jobs:
       - name: Get all source files that have changed
         id: changed-files
         uses: trilom/file-changes-action@v1.2.3
-        with:
-          files: src/**
 
       - name: Show all modified files
         run: |
