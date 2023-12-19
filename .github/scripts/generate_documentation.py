@@ -99,6 +99,9 @@ def git_commit(documentation):
 
         try:
             git.push('--set-upstream', 'origin', new_branch)
+            git.checkout('main')
+            git.merge(new_branch)
+            git.push('origin', 'main')
         except GitCommandError as e:
             print(f"Error pushing to remote: {e}") 
     else:
