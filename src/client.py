@@ -11,5 +11,4 @@ async def test_websocket():
             await websocket.send(f"Update {i}")
 
 # Run the client program
-# Test async websocket call
 asyncio.run(test_websocket())
