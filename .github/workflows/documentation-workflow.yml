@@ -35,6 +35,7 @@ jobs:
           files: src/**
 
       - name: Run documentation script
+        if: steps.changed-files.outputs.any_changed == 'true'
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |

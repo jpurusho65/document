@@ -54,6 +54,8 @@ def document_changed_files(client, changed_files):
     for file_path in changed_files:
         if os.path.isfile(file_path):
             docs[file_path] = remove_code_block_formatting(generate_documentation(client, file_path))
+        else:
+            print(f"Cannot find file {file_path}")
     return docs
 
 
@@ -83,25 +85,28 @@ def git_commit(documentation):
         git.add(doc_file_path)
         modified_files.append(doc_file_path)
 
-    # Configure user details for commit
-    git.config('user.email', 'action@github.com')
-    git.config('user.name', 'GitHub Action')
+    if modified_files:
+        # Configure user details for commit
+        git.config('user.email', 'action@github.com')
+        git.config('user.name', 'GitHub Action')
 
-    # Commit message
-    commit_message = f"""
-        {new_branch} - Updated Documentation\n\n
-        This is an automatic APIOverflow assistent generated documentation
-        The following files were modified:
-        ${modified_files}
-        """
+        # Commit message
+        commit_message = f"""
+            {new_branch} - Updated Documentation\n\n
+            This is an automatic APIOverflow assistent generated documentation
+            The following files were modified:
+            ${modified_files}
+            """
 
-    git.commit('-m', commit_message)
+        git.commit('-m', commit_message)
 
-    try:
-        git.push('--set-upstream', 'origin', new_branch)
-    except GitCommandError as e:
-        print(f"Error pushing to remote: {e}") 
-    
+        try:
+            git.push('--set-upstream', 'origin', new_branch)
+        except GitCommandError as e:
+            print(f"Error pushing to remote: {e}") 
+    else:
+        print("No files modified")
+        
 
 # Command line argument parsing
 parser = argparse.ArgumentParser(description="Generate Documentation")
@@ -114,6 +119,7 @@ if __name__ == "__main__":
     if args.files:
         changed_files = args.files
         documentation = document_changed_files(client, changed_files)
-        git_commit(documentation)
+        if documentation:
+            git_commit(documentation)
     else:
         parser.print_help()
