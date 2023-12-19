@@ -3,8 +3,6 @@ name: Documentation Generation
 on:
   workflow_dispatch:
   push:
-    paths:
-      - src/**
     branches: [ main ]  # or any other branch you want to target
   pull_request:
     branches: [ main ]  # or any other branch you want to target
