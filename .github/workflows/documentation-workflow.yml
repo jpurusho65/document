@@ -34,10 +34,13 @@ jobs:
         with:
           files: src/**
 
+      - name: Show all modified files
+        run: |
+          echo '${{ steps.changed-files.outputs.files_modified }}'
+
       - name: Run documentation script
-        if: steps.changed-files.outputs.any_changed == 'true'
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
-          echo '${{ steps.changed-files.outputs.all_changed_files}}'
-          python .github/scripts/generate_documentation.py --files ${{ steps.changed-files.outputs.all_changed_files }}
+          echo '${{ steps.changed-files.outputs.files_modified }}'
+          python .github/scripts/generate_documentation.py --files ${{ steps.changed-files.outputs.files_modified }}
