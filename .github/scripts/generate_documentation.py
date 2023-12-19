@@ -51,11 +51,8 @@ def remove_code_block_formatting(original_content):
 
 def document_changed_files(client, changed_files):
     docs = {}
-    for file_path in changed_files:
-        if os.path.isfile(file_path):
-            docs[file_path] = remove_code_block_formatting(generate_documentation(client, file_path))
-        else:
-            print(f"Cannot find file {file_path}")
+    for cf in changed_files:
+        docs[cf] = remove_code_block_formatting(generate_documentation(client, cf))
     return docs
 
 
@@ -124,12 +121,10 @@ args = parser.parse_args()
 if __name__ == "__main__":
     client = OpenAI()
     client.api_key=os.environ['OPENAI_API_KEY']
-    # if args.files:
-    #     changed_files = args.files
-    #     documentation = document_changed_files(client, changed_files)
-    #     if documentation:
-    #         git_commit(documentation)
-    # else:
-    #     parser.print_help()
     if args.files:
-        cat_file(args.files)
+        changed_files = args.files
+        documentation = document_changed_files(client, changed_files)
+        if documentation:
+            git_commit(documentation)
+    else:
+        parser.print_help()
