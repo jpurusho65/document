@@ -38,5 +38,6 @@ jobs:
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
+          echo '${{ steps.changed-files.outputs.files}}'
           echo '${{ steps.changed-files.outputs.files_modified}}'
-          python .github/scripts/generate_documentation.py --files ${{ steps.changed-files.outputs.files_modified }}
+          python .github/scripts/generate_documentation.py --files ${{ steps.changed-files.outputs.files }}
