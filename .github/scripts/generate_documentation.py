@@ -108,6 +108,14 @@ def git_commit(documentation):
         print("No files modified")
         
 
+def cat_file(changed_files):
+    for cf in changed_files:
+        lines = []
+        with open(cf, "r") as f:
+            lines= f.readlines()
+        [print(l) for l in lines]
+
+
 # Command line argument parsing
 parser = argparse.ArgumentParser(description="Generate Documentation")
 parser.add_argument("--files", nargs='*', help="List of changed files")
@@ -116,10 +124,12 @@ args = parser.parse_args()
 if __name__ == "__main__":
     client = OpenAI()
     client.api_key=os.environ['OPENAI_API_KEY']
+    # if args.files:
+    #     changed_files = args.files
+    #     documentation = document_changed_files(client, changed_files)
+    #     if documentation:
+    #         git_commit(documentation)
+    # else:
+    #     parser.print_help()
     if args.files:
-        changed_files = args.files
-        documentation = document_changed_files(client, changed_files)
-        if documentation:
-            git_commit(documentation)
-    else:
-        parser.print_help()
+        cat_file(args.files)
