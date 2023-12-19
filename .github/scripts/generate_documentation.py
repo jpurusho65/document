@@ -15,8 +15,9 @@ def generate_documentation(client, file_path):
     Analyze the document step by step. Generate detailed in line documentation for the methods.
     Ensure all method parameters, their types, and return types are documented. Also generate class-level
     documentation where applicable. The output must only include the documented code and no other text. 
-    Do not add any warnings, usage notes, additional note or comments that are not part of the original
-    code's functionality.  The final output must be syntactically correct functional code.
+    Do not add any warnings, usage notes, additional note or comments or any extraneous characters
+    that are not part of the original code's functionality.  The final output must be syntactically
+    correct functional code.
     """
 
     # Generate documentation using OpenAI GPT-4
@@ -42,7 +43,6 @@ def remove_code_block_formatting(original_content):
     if lines[-1].strip() == "```":
         # Remove the last line (```)
         lines = lines[:-1]
-
     # Join the lines back into a single string
     cleaned_content = '\n'.join(lines)
 
@@ -119,6 +119,7 @@ def cat_file(changed_files):
 # Command line argument parsing
 parser = argparse.ArgumentParser(description="Generate Documentation")
 parser.add_argument("--files", nargs='*', help="List of changed files")
+parser.add_argument("--show", nargs='*', help="List of changed files")
 args = parser.parse_args()
 
 if __name__ == "__main__":
@@ -129,5 +130,10 @@ if __name__ == "__main__":
         documentation = document_changed_files(client, changed_files)
         if documentation:
             git_commit(documentation)
+    elif args.show:
+        documentation = document_changed_files(client, args.show)
+        for fname, doc in documentation.items():
+            print(f"File: {fname}")
+            print(doc)
     else:
         parser.print_help()
