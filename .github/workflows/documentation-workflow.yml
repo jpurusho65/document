@@ -18,30 +18,14 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
-      - name: Set up Python 3.x
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.x' 
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install openai GitPython
-
-      - name: Get all source files that have changed
+      - name: Get changed files
         id: changed-files
-        uses: trilom/file-changes-action@v1.2.3
-
-      - name: Show all modified files
+        uses: tj-actions/changed-files@v40
+        
+      - name: List all changed files
         run: |
-          echo '${{ steps.changed-files.outputs.files_modified }}'
-
-      - name: Run documentation script
-        env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        run: |
-          echo '${{ steps.changed-files.outputs.files_modified }}'
-          echo Home: $HOME
-          python .github/scripts/generate_documentation.py --files ${{ steps.changed-files.outputs.files_modified }}
+          for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+            echo "$file was changed"
+          done
