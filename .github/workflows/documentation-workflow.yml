@@ -32,6 +32,8 @@ jobs:
         id: changed-files
         uses: tj-actions/changed-files@v40
         
-      - name: List all changed files
+      - name: Document changed files
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
           python .github/scripts/generate_documentation.py --files ${{ steps.changed-files.outputs.all_changed_files }}
