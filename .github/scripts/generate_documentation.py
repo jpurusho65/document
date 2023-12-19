@@ -26,7 +26,7 @@ def generate_documentation(client, file_path):
                             {"role": "system", "content": f"{prompt}"},
                             {"role": "user", "content": f"{content}"}
                         ]
-                        )
+                )
     return response.choices[0].message.content
 
 def remove_code_block_formatting(original_content):
@@ -63,9 +63,8 @@ def git_commit(documentation):
     git = repo.git
 
     # Generate a unique branch name
-    #b_id = random.randint(1, 1000)
-    #new_branch = f"docs-update-{b_id}"
-    new_branch = "docs-update"
+    unique_id = random.randint(1, 1000)
+    new_branch = f"docs-update-{unique_id}"
 
     # Check if the branch already exists
     try:
@@ -90,7 +89,7 @@ def git_commit(documentation):
 
     # Commit message
     commit_message = f"""
-        {new_branch} - Updated Documentation\n
+        {new_branch} - Updated Documentation\n\n
         This is an automatic APIOverflow assistent generated documentation
         The following files were modified:
         ${modified_files}
@@ -98,10 +97,10 @@ def git_commit(documentation):
 
     git.commit('-m', commit_message)
 
-    #try:
-    #    git.push('--set-upstream', 'origin', new_branch)
-    #except GitCommandError as e:
-    #    print(f"Error pushing to remote: {e}") 
+    try:
+        git.push('--set-upstream', 'origin', new_branch)
+    except GitCommandError as e:
+        print(f"Error pushing to remote: {e}") 
     
 
 # Command line argument parsing
@@ -112,6 +111,9 @@ args = parser.parse_args()
 if __name__ == "__main__":
     client = OpenAI()
     client.api_key=os.environ['OPENAI_API_KEY']
-    changed_files = args.files
-    documentation = document_changed_files(client, changed_files)
-    git_commit(documentation)
+    if args.files:
+        changed_files = args.files
+        documentation = document_changed_files(client, changed_files)
+        git_commit(documentation)
+    else:
+        parser.print_help()
