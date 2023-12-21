@@ -27,7 +27,7 @@ jobs:
         
       - name: Changed lines
         id: changed_lines
-        uses: hestonhoffman/changed-lines@0.1.0
+        uses: hestonhoffman/changed-lines@v1
       - name: Print changed lines
         run: |
             echo ${{ steps.changed_lines.outputs.changed_lines }}
