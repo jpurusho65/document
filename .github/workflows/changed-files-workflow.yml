@@ -1,0 +1,33 @@
+name: Changed Files
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - src/**
+    branches: [ main ]  # or any other branch you want to target
+  pull_request:
+    branches: [ main ]  # or any other branch you want to target
+
+jobs:
+  generate-docs:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.x
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x' 
+        
+      - name: Changed lines
+        id: changed_lines
+        uses: hestonhoffman/changed-lines@0.1.0
+      - name: Print changed lines
+        run: |
+            echo ${{ steps.changed_lines.outputs.changed_lines }}
