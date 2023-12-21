@@ -19,10 +19,10 @@ class MyWebsocketAndUploadProgram:
         uri = "ws://localhost:8000/ws"  # Websocket URL
         async with websockets.connect(uri) as websocket:  # Create a connection to the websocket server
             await websocket.send("Start")  # Send initial message
-            for i in range(10):  # Loop to simulate periodic updates
+            for i in range(5):  # Loop to simulate periodic updates
                 response = await websocket.recv()  # Receive response from server
                 print(response)  # Print the received response
-                await websocket.send(f"Update {i}")  # Send update to the server
+                await websocket.send(f"Update {i}")
 
 
     @staticmethod
@@ -61,4 +61,3 @@ if __name__ == "__main__":
     # Test websocket connection
     asyncio.run(MyWebsocketAndUploadProgram.test_websocket())  # Run websocket test
     MyWebsocketAndUploadProgram.main()  # Run main method
-```
