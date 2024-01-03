@@ -39,8 +39,8 @@ async def post_data(request: Request):
         dict: A dictionary object that acknowledges the data received.
     """
     data = await request.json()
-    print(f"Received POST data: {data}")
-    return {"Received": data}
+    print(f"POST data: {data}")
+    return {data}
 
 @app.post("/upload-file/")
 async def upload_file(file: UploadFile = File(...)):
