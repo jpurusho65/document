@@ -51,7 +51,7 @@ class MyWebsocketAndUploadProgram:
         afterwards it prints the server response.
         """
         server_url = "http://localhost:8000/upload-file/"  # Server url
-        file_to_upload = "sample.txt"  # File to be uploaded
+        file_to_upload = "sample2.txt"  # File to be uploaded
 
         response = MyWebsocketAndUploadProgram.upload_file(server_url, file_to_upload)  # Upload file and get server response
         print(f"Server response: {response.text}")  # Print server response
