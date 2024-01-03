@@ -1,0 +1,25 @@
+name: Changed Files
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - src/**
+    branches: [ main ]  # or any other branch you want to target
+  pull_request:
+    branches: [ main ]  # or any other branch you want to target
+
+jobs:
+  show-diffs:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Find changed lines
+        id: changed_lines
+        uses: hestonhoffman/changed_lines@v1.1
+      - name: Print changed lines
+        run: echo ${{ steps.changed_lines.outputs.changed_lines }} 
