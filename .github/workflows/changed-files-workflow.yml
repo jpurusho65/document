@@ -10,7 +10,7 @@ on:
     branches: [ main ]  # or any other branch you want to target
 
 jobs:
-  generate-docs:
+  show-diffs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -20,9 +20,21 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Changed lines
-        id: changed_lines
-        uses: hestonhoffman/changed-lines@0.1.0
-      - name: Print changed lines
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 2  # OR "2" -> To retrieve the preceding commit.
+
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v14.6
+
+      - name: List all changed files
         run: |
-            echo ${{ steps.changed_lines.outputs.changed_lines }}
+          for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+            echo "$file was changed"
+          done 
+    
+      - name: Show diffs
+        run: |
+            gh pr view XXX --json files -q '.files[].path'
+            
