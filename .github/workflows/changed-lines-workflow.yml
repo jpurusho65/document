@@ -2,7 +2,13 @@ name: sample-workflow
 
 # Run on all pull_request related events
 on:
+  workflow_dispatch:
+  push:
+    paths:
+      - src/**
+    branches: [ main ]  # or any other branch you want to target
   pull_request:
+    branches: [ main ]  # or any other branch you want to target
 
 permissions:
   contents: read # this is necessary for the Action to be able to read the contents of the repo
