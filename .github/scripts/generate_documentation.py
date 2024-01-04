@@ -2,11 +2,24 @@ import os
 from openai import OpenAI
 import random
 import json
-
 import argparse
 from git import Repo, GitCommandError
 
 def generate_documentation(client, file_path):
+    """
+    Generate documentation for a given file using OpenAI GPT-4.
+
+    This function reads the content of the specified file and sends it to OpenAI's GPT-4 model
+    to generate inline documentation. The function assumes that the client is an initialized
+    and authenticated OpenAI client.
+
+    Args:
+        client (OpenAI): The OpenAI client used to send requests to GPT-4.
+        file_path (str): The path to the file for which documentation is to be generated.
+
+    Returns:
+        str: The generated documentation for the file.
+    """
     # Load file content
     with open(file_path, 'r') as file:
         content = file.read()
@@ -32,70 +45,97 @@ def generate_documentation(client, file_path):
     return response.choices[0].message.content
 
 def remove_code_block_formatting(original_content):
+    """
+    Remove Markdown code block formatting from a string.
+
+    This function is used to clean up the content that is formatted as a Markdown code block.
+    It removes the starting and ending ``` that are used to denote code blocks in Markdown.
+
+    Args:
+        original_content (str): The content string with Markdown code block formatting.
+
+    Returns:
+        str: The cleaned content without Markdown code block formatting.
+    """
     # Split the content into lines
     lines = original_content.split('\n')
 
-    # Check if the first line starts with ```
+    # Remove Markdown code block delimiters
     if lines[0].strip().startswith("```"):
-        # Remove the first line (```language)
         lines = lines[1:]
-
-    # Check if the last line ends with ```
     if lines[-1].strip() == "```":
-        # Remove the last line (```)
         lines = lines[:-1]
+
     # Join the lines back into a single string
     cleaned_content = '\n'.join(lines)
 
     return cleaned_content
 
-
 def document_changed_files(client, changed_files):
+    """
+    Generate documentation for a list of changed files.
+
+    This function takes a list of file paths and generates documentation for each file
+    using the `generate_documentation` function. It also removes any Markdown formatting
+    from the generated documentation.
+
+    Args:
+        client (OpenAI): The OpenAI client used for documentation generation.
+        changed_files (list[str]): A list of file paths for which documentation needs to be generated.
+
+    Returns:
+        dict: A dictionary with file paths as keys and their corresponding generated documentation as values.
+    """
     docs = {}
     for cf in changed_files:
         docs[cf] = remove_code_block_formatting(generate_documentation(client, cf))
     return docs
 
-
 def git_commit(documentation):
+    """
+    Commit generated documentation to a Git repository.
+
+    This function creates a new branch, writes the generated documentation to the respective files,
+    and commits these changes to the Git repository. It handles Git operations and commits the changes
+    under a unique branch name.
+
+    Args:
+        documentation (dict): A dictionary containing file paths and their corresponding documentation.
+
+    Raises:
+        GitCommandError: If there is an error in Git operations.
+    """
     # Set up Git operations
     repo = Repo('.')
     git = repo.git
 
-    # Generate a unique branch name
+    # Create and checkout a unique branch
     unique_id = random.randint(1, 1000)
     new_branch = f"docs-update-{unique_id}"
-
-    # Check if the branch already exists
     try:
         git.checkout(new_branch)
     except GitCommandError:
-        # If the branch does not exist, create and checkout the branch
         git.checkout('HEAD', b=new_branch)
 
     modified_files = []
-    # Commit and push documentation
+    # Write documentation and add to Git
     for file_path, doc in documentation.items():
-        doc_file_path = file_path  # Assuming markdown format for docs
+        doc_file_path = file_path
         with open(doc_file_path, 'w') as file:
             file.write(doc)
-
         git.add(doc_file_path)
         modified_files.append(doc_file_path)
 
+    # Commit and push changes if any files were modified
     if modified_files:
-        # Configure user details for commit
         git.config('user.email', 'action@github.com')
         git.config('user.name', 'GitHub Action')
-
-        # Commit message
         commit_message = f"""
             {new_branch} - Updated Documentation\n\n
-            This is an automatic APIOverflow assistent generated documentation
+            This is an automatic APIOverflow assistant generated documentation
             The following files were modified:
             ${modified_files}
             """
-
         git.commit('-m', commit_message)
 
         try:
@@ -107,24 +147,37 @@ def git_commit(documentation):
             print(f"Error pushing to remote: {e}") 
     else:
         print("No files modified")
-        
 
 def cat_file(changed_files):
+    """
+    Print the content of a list of files.
+
+    This function takes a list of file paths and prints the content of each file to the console.
+    It's a utility function used to display file contents.
+
+    Args:
+        changed_files (list[str]): A list of file paths whose contents are to be printed.
+    """
     for cf in changed_files:
-        lines = []
         with open(cf, "r") as f:
-            lines= f.readlines()
+            lines = f.readlines()
         [print(l) for l in lines]
 
 def print_parsed_diff(diff):
+    """
+    Print the parsed information from a JSON diff file.
+
+    This function reads a JSON file containing diff information and prints the paths of changed files.
+    It's used to display the changed files based on a diff provided in JSON format.
+
+    Args:
+        diff (str): The path to the JSON file containing the diff information.
+    """
     with open(diff, 'r') as f:
         doc = json.load(f)
 
     if doc:
-        cf_list = []
-        for cf in doc["files"]:
-            cf_list.append(cf["path"])
-    
+        cf_list = [cf["path"] for cf in doc["files"]]
     print(f"Changed files: {cf_list}")
 
 # Command line argument parsing
@@ -136,7 +189,7 @@ args = parser.parse_args()
 
 if __name__ == "__main__":
     client = OpenAI()
-    client.api_key=os.environ['OPENAI_API_KEY']
+    client.api_key = os.environ['OPENAI_API_KEY']
     if args.files:
         changed_files = args.files
         documentation = document_changed_files(client, changed_files)
