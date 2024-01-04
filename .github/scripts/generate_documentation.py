@@ -1,6 +1,7 @@
 import os
 from openai import OpenAI
 import random
+import json
 
 import argparse
 from git import Repo, GitCommandError
@@ -115,11 +116,22 @@ def cat_file(changed_files):
             lines= f.readlines()
         [print(l) for l in lines]
 
+def print_parsed_diff(diff):
+    with open(diff, 'r') as f:
+        doc = json.load(f)
+
+    if doc:
+        cf_list = []
+        for cf in doc["files"]:
+            cf_list.append(cf["path"])
+    
+    print(f"Changed files: {cf_list}")
 
 # Command line argument parsing
 parser = argparse.ArgumentParser(description="Generate Documentation")
 parser.add_argument("--files", nargs='*', help="List of changed files")
 parser.add_argument("--show", nargs='*', help="List of changed files")
+parser.add_argument("--parse", nargs='*', help="Parse JSON diff")
 args = parser.parse_args()
 
 if __name__ == "__main__":
@@ -135,5 +147,7 @@ if __name__ == "__main__":
         for fname, doc in documentation.items():
             print(f"File: {fname}")
             print(doc)
+    elif args.parse:
+        print_parsed_diff(args.parse[0])
     else:
         parser.print_help()
