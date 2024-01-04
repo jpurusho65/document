@@ -163,7 +163,7 @@ def cat_file(changed_files):
             lines = f.readlines()
         [print(l) for l in lines]
 
-def print_parsed_diff(diff):
+def print_parsed_diff(diff_list):
     """
     Print the parsed information from a JSON diff file.
 
@@ -173,11 +173,12 @@ def print_parsed_diff(diff):
     Args:
         diff (str): The path to the JSON file containing the diff information.
     """
-    with open(diff, 'r') as f:
-        doc = json.load(f)
-
-    if doc:
-        cf_list = [cf["path"] for cf in doc["files"]]
+    cf_list = []
+    for diff_file in diff_list:
+        with open(diff_file, 'r') as f:
+            doc = json.load(f)
+        if doc:
+            cf_list = [cf["path"] for cf in doc["files"]]
     print(f"Changed files: {cf_list}")
 
 # Command line argument parsing
@@ -201,6 +202,6 @@ if __name__ == "__main__":
             print(f"File: {fname}")
             print(doc)
     elif args.parse:
-        print_parsed_diff(args.parse[0])
+        print_parsed_diff(args.parse)
     else:
         parser.print_help()
