@@ -3,8 +3,6 @@ import argparse
 import itertools
 from openai import OpenAI
 
-
-
 # Map of languages to their file extensions
 language_extensions = {
     "python": [".py"],
@@ -14,6 +12,19 @@ language_extensions = {
 }
 
 def guess_language_based_on_extension(file_path, language_extensions):
+    """
+    Guess the programming language based on the file extension.
+
+    This function takes a file path and a dictionary mapping languages to their file extensions.
+    It returns the language that matches the file extension of the given file path.
+
+    Args:
+        file_path (str): The path to the file.
+        language_extensions (dict): A dictionary mapping languages to their file extensions.
+
+    Returns:
+        str: The guessed language. If no match is found, None is returned.
+    """
     # Extract the extension from the file path
     _, ext = os.path.splitext(file_path)
 
@@ -27,6 +38,17 @@ def guess_language_based_on_extension(file_path, language_extensions):
 
 
 def select_prompt(language):
+    """
+    Select the appropriate prompt based on the language.
+
+    This function takes a language and returns a prompt that is appropriate for that language.
+
+    Args:
+        language (str): The programming language.
+
+    Returns:
+        str: The prompt for the given language. If no match is found, None is returned.
+    """
     prompts = {
         "python": """
             ### Please generate documentation for the following Python source code
@@ -95,6 +117,16 @@ def get_documentation(client, file_path):
 
 
 def generate_docs(client, start_path):
+    """
+    Generate documentation for all files in a directory and its subdirectories.
+
+    This function walks through a directory and its subdirectories, and for each file with a recognized
+    extension, it generates documentation using the get_documentation function.
+
+    Args:
+        client (OpenAI): The OpenAI client used to send requests to GPT-4.
+        start_path (str): The path to the directory where the process should start.
+    """
     extensions = list(itertools.chain.from_iterable(language_extensions.values()))
     for subdir, _, files in os.walk(start_path):
         for file in files:
@@ -114,6 +146,13 @@ parser.add_argument("--start-path", type=str, default=".", help="The start path 
 args = parser.parse_args()
 
 if __name__ == "__main__":
+    """
+    Main function.
+
+    This function is the entry point of the script. It parses command line arguments and starts the documentation
+    generation process. If the OpenAI API key is not set in the environment variables, it can be provided as a command
+    line argument.
+    """
     start_path = args.start_path
     if not os.environ.get('OPENAI_API_KEY'):
         if args.openai_key:

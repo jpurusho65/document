@@ -188,6 +188,13 @@ parser.add_argument("--parse", nargs='*', help="Parse JSON diff")
 args = parser.parse_args()
 
 if __name__ == "__main__":
+    """
+    Main function to execute the script.
+
+    This function initializes the OpenAI client, parses command line arguments, and calls the appropriate functions
+    based on the arguments provided. It can generate documentation for a list of files, show the generated documentation,
+    or parse a list of JSON diff files and print the changed files.
+    """
     client = OpenAI()
     client.api_key = os.environ['OPENAI_API_KEY']
     if args.files:
