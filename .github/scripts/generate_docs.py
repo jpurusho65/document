@@ -11,6 +11,8 @@ language_extensions = {
     # Add more languages and extensions as needed
 }
 
+dirs_to_skip = ['.git', '.github']
+
 def guess_language_based_on_extension(file_path, language_extensions):
     """
     Guess the programming language based on the file extension.
@@ -116,7 +118,7 @@ def get_documentation(client, file_path):
             return response.choices[0].message.content
 
 
-def generate_docs(client, start_path):
+def generate_docs(client, start_path, dirs_to_skip):
     """
     Generate documentation for all files in a directory and its subdirectories.
 
@@ -128,15 +130,16 @@ def generate_docs(client, start_path):
         start_path (str): The path to the directory where the process should start.
     """
     extensions = list(itertools.chain.from_iterable(language_extensions.values()))
-    for subdir, _, files in os.walk(start_path):
+    for subdir, dirs, files in os.walk(start_path):
+        dirs[:] = [d for d in dirs if d not in dirs_to_skip]
         for file in files:
             if any(file.endswith(ext) for ext in extensions):
                 filepath = os.path.join(subdir, file)
                 print(f"Generating document for {filepath} ...")
                 document = get_documentation(client, filepath)
-                if document:
-                    with open(filepath, "w") as file:
-                        file.write(document)
+                #if document:
+                #    with open(filepath, "w") as file:
+                #        file.write(document)
 
 
 # Command line argument parsing
@@ -161,4 +164,4 @@ if __name__ == "__main__":
             parser.print_help()
 
     client = OpenAI()
-    generate_docs(client, args.start_path)
+    generate_docs(client, args.start_path, dirs_to_skip)
