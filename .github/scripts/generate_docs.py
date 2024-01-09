@@ -43,6 +43,14 @@ def select_prompt(language):
             modify any code logic, structure, or import statements. Ensure that the 
             output does not include markdown code block ticks (```). Do not drop or
             omit any of the original code. The code is as follows::###
+            """,
+        "typescript": """
+            ### Please generate documentation for the following JavaScript/TypeScript source code
+            following the JSDoc documentation convention. Ensure that the source code
+            remains unchanged, and only the comments are added or updated. Do not 
+            modify any code logic, structure, or import statements. Ensure that the 
+            output does not include markdown code block ticks (```). Do not drop or
+            omit any of the original code. The code is as follows::###
             """
         # Add more languages and prompts as needed
     }
@@ -84,34 +92,6 @@ def get_documentation(client, file_path):
                         seed=100
                 )
             return response.choices[0].message.content
-
-
-def remove_markdown_code_block_formatting(original_content):
-    """
-    Remove Markdown code block formatting from a string.
-
-    This function is used to clean up the content that is formatted as a Markdown code block.
-    It removes the starting and ending ``` that are used to denote code blocks in Markdown.
-
-    Args:
-        original_content (str): The content string with Markdown code block formatting.
-
-    Returns:
-        str: The cleaned content without Markdown code block formatting.
-    """
-    # Split the content into lines
-    lines = original_content.split('\n')
-
-    # Remove Markdown code block delimiters
-    if lines[0].strip().startswith("```"):
-        lines = lines[1:]
-    if lines[-1].strip() == "```":
-        lines = lines[:-1]
-
-    # Join the lines back into a single string
-    cleaned_content = '\n'.join(lines)
-
-    return cleaned_content
 
 
 def generate_docs(client, start_path):
