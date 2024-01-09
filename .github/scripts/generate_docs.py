@@ -135,11 +135,11 @@ def generate_docs(client, start_path, dirs_to_skip):
         for file in files:
             if any(file.endswith(ext) for ext in extensions):
                 filepath = os.path.join(subdir, file)
-                print(f"Generating document for {filepath} ...")
+                print(f"Generating document for {filepath}")
                 document = get_documentation(client, filepath)
-                #if document:
-                #    with open(filepath, "w") as file:
-                #        file.write(document)
+                if document:
+                    with open(filepath, "w") as file:
+                        file.write(document)
 
 
 # Command line argument parsing
