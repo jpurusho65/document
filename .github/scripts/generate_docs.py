@@ -107,6 +107,7 @@ def generate_docs(client, start_path):
         for file in files:
             if any(file.endswith(ext) for ext in language_extensions):
                 filepath = os.path.join(subdir, file)
+                print(f"Generating document for {filepath} ...")
                 document = client.get_documentation(client, filepath)
                 if document:
                     with open(filepath, "w") as file:
@@ -125,6 +126,6 @@ if __name__ == "__main__":
         openai.api_key = args.openai_key
         print(f"OpenAI Key: {args.openai_key}")
         print(f"Start Path: {args.start_path}")
-        #generate_docs(openai, args.start_path)
+        generate_docs(openai, args.start_path)
     else:
         parser.print_help()
