@@ -1,7 +1,7 @@
 import os
 import subprocess
 import argparse
-from openai import OpenAI
+import openai
 from guesslang import Guess
 
 
@@ -122,10 +122,9 @@ args = parser.parse_args()
 if __name__ == "__main__":
     start_path = args.start_path
     if args.openai_key:
-        client = OpenAI()
-        client.api_key = args.openai_key
+        openai.api_key = args.openai_key
         print("OpenAI Key: {args.openai_key}")
         print("Start Path: {args.start_path}")
-        #generate_docs(client, args.start_path)
+        #generate_docs(openai, args.start_path)
     else:
         parser.print_help()
