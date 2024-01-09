@@ -25,13 +25,12 @@ def generate_documentation(client, file_path):
         content = file.read()
 
     prompt = """
-    You are a programming assistant designed to generate documentation for program source code.
-    Analyze the document step by step. Generate detailed in line documentation for the methods.
-    Ensure all method parameters, their types, and return types are documented. Also generate class-level
-    documentation where applicable. The output must only include the documented code and no other text. 
-    Do not add any warnings, usage notes, additional note or comments or any extraneous characters
-    that are not part of the original code's functionality.  The final output must be syntactically
-    correct functional code.
+    Please add or update the Javadoc documentation for the following Java source code.
+    Ensure that the source code remains unchanged, and only the comments are added or 
+    updated according to Javadoc conventions. Do not modify any code logic, structure,
+    or import statements. Ensure that the output does not include markdown code block ticks (```).
+    Do not drop or omit any of the original code.
+    The Java source code is as follows:
     """
 
     # Generate documentation using OpenAI GPT-4
@@ -88,7 +87,7 @@ def document_changed_files(client, changed_files):
     """
     docs = {}
     for cf in changed_files:
-        docs[cf] = remove_code_block_formatting(generate_documentation(client, cf))
+        docs[cf] = generate_documentation(client, cf)
     return docs
 
 def git_commit(documentation):
@@ -165,20 +164,20 @@ def cat_file(changed_files):
 
 def print_parsed_diff(diff_list):
     """
-    Print the parsed information from a JSON diff file.
+    Print the parsed information from multiple JSON diff files.
 
-    This function reads a JSON file containing diff information and prints the paths of changed files.
-    It's used to display the changed files based on a diff provided in JSON format.
+    This function reads multiple JSON files, each containing diff information, and prints the paths of changed files
+    for each of these diff files. It's used to display the changed files based on diffs provided in JSON format.
 
     Args:
-        diff (str): The path to the JSON file containing the diff information.
+        diff_list (list[str]): A list of paths to JSON files, each containing diff information.
     """
     cf_list = []
     for diff_file in diff_list:
         with open(diff_file, 'r') as f:
             doc = json.load(f)
         if doc:
-            cf_list = [cf["path"] for cf in doc["files"]]
+            cf_list.extend([cf["path"] for cf in doc["files"]])
     print(f"Changed files: {cf_list}")
 
 # Command line argument parsing
@@ -198,8 +197,7 @@ if __name__ == "__main__":
             git_commit(documentation)
     elif args.show:
         documentation = document_changed_files(client, args.show)
-        for fname, doc in documentation.items():
-            print(f"File: {fname}")
+        for _ , doc in documentation.items():
             print(doc)
     elif args.parse:
         print_parsed_diff(args.parse)

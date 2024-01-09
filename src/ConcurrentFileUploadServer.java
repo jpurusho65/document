@@ -3,69 +3,78 @@ import java.net.*;
 import java.util.concurrent.*;
 
 /**
- * This class represents a server that facilitates concurrent file uploads.
+ * A concurrent file upload server which provides multithreaded service to clients that upload files.
+ * The maximum number of threads is 10, and the server listens on port 8080.
  */
 public class ConcurrentFileUploadServer {
 
-    // Defines the port on which the server listens.
+    /**
+     * The port on which the server will listen for incoming connections.
+     */
     private static final int PORT = 8080;
 
-    // Defines the maximum number of thread the server will spawn.
+    
+    /**
+     * The maximum number of threads in the thread pool for handling file upload tasks.
+     */
     private static final int MAX_THREADS = 10;
 
     /**
-     * The main method to start the server.
+     * The entry point of the program.
+     * Sets up the server to listen on specified PORT
+     * and keeps server running infinitely, accepting all incoming client requests
+     * Each client request is handed over to ExecutorService (Thread Pool) to be processed concurrently
      *
-     * @param args Command line arguments
-     * @throws IOException if it encounters any I/O error when performing server operations.
+     * @param args command-line arguments (not used)
+     * @throws IOException if an I/O error occurs when server socket is opened
      */
     public static void main(String[] args) throws IOException {
-        // Creates a thread pool.
+
         ExecutorService executor = Executors.newFixedThreadPool(MAX_THREADS);
 
-        // Creates a server socket on the specified PORT.
         ServerSocket serverSocket = new ServerSocket(PORT);
 
         System.out.println("Server started on port " + PORT);
 
-        // Continuously accepts incoming client connections and spawns a new thread for each connection.
         while (true) {
             Socket clientSocket = serverSocket.accept();
 
-            // Submits the new file upload task to the executor.
             executor.submit(new FileUploadHandler(clientSocket));
         }
     }
 
+    
     /**
-     * The FileUploadHandler class is a Runnable that handles a single client's file upload.
+     * A runnable task for handling file upload from a client.
      */
     private static class FileUploadHandler implements Runnable {
-        // Represents the socket of the client this FileUploadHandler handles.
+ 
+        /**
+         * Socket connected to the client.
+         */
         private final Socket clientSocket;
 
         /**
-         * Constructor initializing a FileUploadHandler for a given client socket.
+         * Constructs a FileUploadHandler for the given socket
          *
-         * @param socket The client socket
+         * @param socket The socket connected to the client
          */
         public FileUploadHandler(Socket socket) {
             this.clientSocket = socket;
         }
 
         /**
-         * This method reads data from the client and writes it to a file.
+         * Perform the file upload by reading from the client socket Input Stream and writing to a local file
+         * The method runs in a separate thread
          */
         @Override
         public void run() {
             try (DataInputStream dis = new DataInputStream(clientSocket.getInputStream());
-                 // Creates a FileOutputStream to write the uploaded file.
                  FileOutputStream fos = new FileOutputStream("uploaded_file_" + Thread.currentThread().getId() + ".dat")) {
-                
+
                 byte[] buffer = new byte[4096];
                 int read;
 
-                // Continuously reads data from the client and writes it to a file until there is no more data.
                 while ((read = dis.read(buffer)) > 0) {
                     fos.write(buffer, 0, read);
                 }
@@ -76,7 +85,6 @@ public class ConcurrentFileUploadServer {
                 System.err.println("Error handling file upload: " + e.getMessage());
             } finally {
                 try {
-                    // Closes the client socket.
                     clientSocket.close();
                 } catch (IOException e) {
                     System.err.println("Error closing socket: " + e.getMessage());
