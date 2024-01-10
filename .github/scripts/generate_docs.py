@@ -203,7 +203,7 @@ parser = argparse.ArgumentParser(description="Generate Documentation")
 parser.add_argument("--openai-key", type=str, default="", help="OpenAI Key")
 parser.add_argument("--start-path", type=str, default=".", help="The start path for processing (default: current directory)")
 parser.add_argument("--diffs-file", type=str, default=None, help="File containing the git diff of changes")
-parser.add_argument("--changed-files", nargs='*', help="List of changed files")
+parser.add_argument("--changed-files", type=str, default=None,  help="Text file containing changed files")
 args = parser.parse_args()
 
 if __name__ == "__main__":
