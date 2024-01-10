@@ -1,3 +1,6 @@
+The updated source code with integrated documentation is:
+
+```python
 import asyncio
 import websockets
 import requests
@@ -56,3 +59,4 @@ if __name__ == "__main__":
     # Test websocket connection
     asyncio.run(MyWebsocketAndUploadProgram.test_websocket())  # Run websocket test
     MyWebsocketAndUploadProgram.main()  # Run main method
+```
