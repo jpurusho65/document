@@ -37,7 +37,7 @@ jobs:
       - name: Upload results as artifact
         uses: actions/upload-artifact@v2
         with:
-          name: git-diff-output
+          name: git_diff_output
           path: diff.txt
 
   changed-files:
@@ -93,7 +93,7 @@ jobs:
       - name: Download artifact from compute-diffs
         uses: actions/download-artifact@v2
         with:
-          name: git-diff-output
+          name: git_diff_output
 
       - name: Download artifact from changed-files
         uses: actions/download-artifact@v2
@@ -103,7 +103,7 @@ jobs:
       - name: Update Source Documentation
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        run: python .github/scripts/generate_docs.py  --diffs git-diff-output --changed-files changed_files.txt
+        run: python .github/scripts/generate_docs.py  --diffs diff.txt --changed-files changed_files.txt
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v3
