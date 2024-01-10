@@ -1,3 +1,6 @@
+The git diff indicates that the documentation for the `main` method in the `MyWebsocketAndUploadProgram` class has been removed. Therefore, the updated source code with integrated documentation is as follows:
+
+```python
 import asyncio
 import websockets
 import requests
@@ -56,3 +59,4 @@ if __name__ == "__main__":
     # Test websocket connection
     asyncio.run(MyWebsocketAndUploadProgram.test_websocket())  # Run websocket test
     MyWebsocketAndUploadProgram.main()  # Run main method
+```
