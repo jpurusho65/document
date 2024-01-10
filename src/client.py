@@ -1,3 +1,6 @@
+The updated source code with integrated documentation is:
+
+```python
 import asyncio
 import websockets
 import requests
