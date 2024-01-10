@@ -103,7 +103,7 @@ jobs:
       - name: Update Source Documentation
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        run: python .github/scripts/generate_docs.py --openai-key ${{ github.event.inputs.openaikey }} --diffs git-diff-output --changed-files changed_files.txt
+        run: python .github/scripts/generate_docs.py  --diffs git-diff-output --changed-files changed_files.txt
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v3
