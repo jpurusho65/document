@@ -98,7 +98,9 @@ def select_prompt_for_diffs(language, diffs):
             Based on the following git diff, integrate the updates into the previously
             provided documentation for the source code in python. Update the documentation 
             only for the parts that have changed according to the git diff, and then provide 
-            the complete source code with the integrated documentation.
+            the complete source code with the integrated documentation. Ensure that the 
+            output does not include markdown code block ticks (```). Do not drop or
+            omit any of the original code.
             The git diff is as follows:
             {diffs}
             The original source code with documentation is:
@@ -107,7 +109,9 @@ def select_prompt_for_diffs(language, diffs):
             Based on the following git diff, integrate the updates into the previously
             provided documentation for the source code in Java Script. Update the documentation 
             only for the parts that have changed according to the git diff, and then provide 
-            the complete source code with the integrated documentation.
+            the complete source code with the integrated documentation. Ensure that the 
+            output does not include markdown code block ticks (```). Do not drop or
+            omit any of the original code.
             The git diff is as follows:
             {diffs}
             The original source code with documentation is:
@@ -116,7 +120,9 @@ def select_prompt_for_diffs(language, diffs):
             Based on the following git diff, integrate the updates into the previously
             provided documentation for the source code in TypeScript. Update the documentation 
             only for the parts that have changed according to the git diff, and then provide 
-            the complete source code with the integrated documentation.
+            the complete source code with the integrated documentation. Ensure that the 
+            output does not include markdown code block ticks (```). Do not drop or
+            omit any of the original code.
             The git diff is as follows:
             {diffs}
             The original source code with documentation is:
