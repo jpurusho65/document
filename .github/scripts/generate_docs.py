@@ -200,9 +200,9 @@ def update_docs(client, changed_files, git_diff_file):
     
 # Command line argument parsing
 parser = argparse.ArgumentParser(description="Generate Documentation")
-parser.add_argument("--openai-key", type=str, help="OpenAI Key")
+parser.add_argument("--openai-key", type=str, default=None, help="OpenAI Key")
 parser.add_argument("--start-path", type=str, default=".", help="The start path for processing (default: current directory)")
-parser.add_argument("--diffs-file", type=str, default=".", help="File containing the git diff of changes")
+parser.add_argument("--diffs-file", type=str, default=None, help="File containing the git diff of changes")
 parser.add_argument("--changed-files", nargs='*', help="List of changed files")
 args = parser.parse_args()
 
