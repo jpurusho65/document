@@ -39,8 +39,36 @@ jobs:
           name: git-diff-output
           path: diff.txt
 
+  changed-files:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+      
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v40
+
+      - name: Output changed files to file
+        env:
+          ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
+        run: |
+          for file in "$ALL_CHANGED_FILES"; do
+            echo $file >> changed_files.txt
+          done
+
+      - name: Upload results as artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: changed_files
+          path: changed_files.txt
+
   update-docs:
-    needs: compute-diffs
+    needs: [compute-diffs, changed-files]
     runs-on: ubuntu-latest
 
     permissions:
@@ -66,8 +94,13 @@ jobs:
         with:
           name: git-diff-output
 
-      - name: Generate Source Documentation
-        run: python .github/scripts/generate_docs.py --openai-key ${{ github.event.inputs.openaikey }} --diffs git-diff-output
+      - name: Download artifact from changed-files
+        uses: actions/download-artifact@v2
+        with:
+          name: changed_files
+
+      - name: Update Source Documentation
+        run: python .github/scripts/generate_docs.py --openai-key ${{ github.event.inputs.openaikey }} --diffs git-diff-output --changed-files changed_files.txt
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v3

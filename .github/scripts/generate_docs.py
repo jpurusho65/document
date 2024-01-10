@@ -223,6 +223,12 @@ if __name__ == "__main__":
 
     client = OpenAI()
     if args.changed_files and args.diffs_file:
-        update_docs(client, args.changed_files, args.diffs_file)
+        with open(args.changed_files, 'r') as f:
+            content = f.readlines()
+        with open(args.diffs_file, 'r') as f:
+            diffs = f.readlines()
+        print(f"Changed files: {content}")
+        print(f"Git diffs: {diffs}")
+        #update_docs(client, args.changed_files, args.diffs_file)
     else:
         generate_docs(client, args.start_path, dirs_to_skip)
