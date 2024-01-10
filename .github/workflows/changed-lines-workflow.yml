@@ -105,6 +105,10 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: python .github/scripts/generate_docs.py  --diffs diff.txt --changed-files changed_files.txt
 
+      - name: Remove temporary files
+        run: |
+          rm -rf diff.txt changed_files.txt
+
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v3
         with:
