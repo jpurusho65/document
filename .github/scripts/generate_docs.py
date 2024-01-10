@@ -39,6 +39,34 @@ def guess_language_based_on_extension(file_path, language_extensions):
     return None 
 
 
+def remove_code_block_formatting(original_content):
+    """
+    Remove Markdown code block formatting from a string.
+
+    This function is used to clean up the content that is formatted as a Markdown code block.
+    It removes the starting and ending ``` that are used to denote code blocks in Markdown.
+
+    Args:
+        original_content (str): The content string with Markdown code block formatting.
+
+    Returns:
+        str: The cleaned content without Markdown code block formatting.
+    """
+    # Split the content into lines
+    lines = original_content.split('\n')
+
+    # Remove Markdown code block delimiters
+    if lines[0].strip().startswith("```"):
+        lines = lines[1:]
+    if lines[-1].strip() == "```":
+        lines = lines[:-1]
+
+    # Join the lines back into a single string
+    cleaned_content = '\n'.join(lines)
+
+    return cleaned_content
+
+
 def select_prompt(language):
     """
     Select the appropriate prompt based on the language.
@@ -162,7 +190,7 @@ def get_documentation(client, file_path, prompt):
                     temperature=0,
                     seed=100
             )
-        return response.choices[0].message.content
+        return remove_code_block_formatting(response.choices[0].message.content)
 
 
 def generate_docs(client, start_path, dirs_to_skip):
