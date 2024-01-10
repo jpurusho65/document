@@ -80,8 +80,52 @@ def select_prompt(language):
     }
     return prompts.get(language.lower(), None)
 
+def select_prompt_for_diffs(language, diffs):
+    """
+    Select the appropriate prompt based on the language.
 
-def get_documentation(client, file_path):
+    This function takes a language and returns a prompt that is appropriate for that language.
+
+    Args:
+        language (str): The programming language.
+        diffs (str): The git diff output of changes
+
+    Returns:
+        str: The prompt for the given language. If no match is found, None is returned.
+    """
+    prompts = {
+        "python": f"""
+            Based on the following git diff, integrate the updates into the previously
+            provided documentation for the source code in python. Update the documentation 
+            only for the parts that have changed according to the git diff, and then provide 
+            the complete source code with the integrated documentation.
+            The git diff is as follows:
+            {diffs}
+            The original source code with documentation is:
+            """,
+        "javascript": f"""
+            Based on the following git diff, integrate the updates into the previously
+            provided documentation for the source code in Java Script. Update the documentation 
+            only for the parts that have changed according to the git diff, and then provide 
+            the complete source code with the integrated documentation.
+            The git diff is as follows:
+            {diffs}
+            The original source code with documentation is:
+            """,
+        "typescript": f"""
+            Based on the following git diff, integrate the updates into the previously
+            provided documentation for the source code in TypeScript. Update the documentation 
+            only for the parts that have changed according to the git diff, and then provide 
+            the complete source code with the integrated documentation.
+            The git diff is as follows:
+            {diffs}
+            The original source code with documentation is:
+            """,
+        # Add more languages and prompts as needed
+    }
+    return prompts.get(language.lower(), None)
+
+def get_documentation(client, file_path, prompt):
     """
     Generate documentation for a given file using OpenAI GPT-4.
 
@@ -92,6 +136,7 @@ def get_documentation(client, file_path):
     Args:
         client (OpenAI): The OpenAI client used to send requests to GPT-4.
         file_path (str): The path to the file for which documentation is to be generated.
+        prompt (str): Prompt to use for OpenAI query
 
     Returns:
         str: The generated documentation for the file.
@@ -100,22 +145,18 @@ def get_documentation(client, file_path):
     with open(file_path, 'r') as file:
         content = file.read()
 
-    if content:
-        language = guess_language_based_on_extension(file_path, language_extensions)
-        prompt = select_prompt(language)
-
-        if prompt:
-            # Generate documentation using OpenAI GPT-4
-            response = client.chat.completions.create(
-                        model="gpt-4",
-                        messages=[
-                            {"role": "system", "content": f"{prompt}"},
-                            {"role": "user", "content": f"{content}"}
-                        ],
-                        temperature=0,
-                        seed=100
-                )
-            return response.choices[0].message.content
+    if content and prompt:
+        # Generate documentation using OpenAI GPT-4
+        response = client.chat.completions.create(
+                    model="gpt-4",
+                    messages=[
+                        {"role": "system", "content": f"{prompt}"},
+                        {"role": "user", "content": f"{content}"}
+                    ],
+                    temperature=0,
+                    seed=100
+            )
+        return response.choices[0].message.content
 
 
 def generate_docs(client, start_path, dirs_to_skip):
@@ -136,16 +177,33 @@ def generate_docs(client, start_path, dirs_to_skip):
             if any(file.endswith(ext) for ext in extensions):
                 filepath = os.path.join(subdir, file)
                 print(f"Generating document for {filepath}")
-                document = get_documentation(client, filepath)
+                language = guess_language_based_on_extension(filepath, language_extensions)
+                prompt = select_prompt(language)
+                document = get_documentation(client, filepath, prompt)
                 if document:
                     with open(filepath, "w") as file:
                         file.write(document)
 
 
+def update_docs(client, changed_files, git_diff_file):
+    for cf in changed_files:
+        language = guess_language_based_on_extension(cf, language_extensions)
+        with open(git_diff_file, "r") as gd:
+            diffs = gd.readlines()
+        prompt = select_prompt_for_diffs(language, diffs)
+        print(f"Updating document for {cf}")
+        document = get_documentation(client, cf, prompt)
+        if document:
+            with open(cf, "w") as file:
+                file.write(document)
+
+    
 # Command line argument parsing
 parser = argparse.ArgumentParser(description="Generate Documentation")
 parser.add_argument("--openai-key", type=str, help="OpenAI Key")
 parser.add_argument("--start-path", type=str, default=".", help="The start path for processing (default: current directory)")
+parser.add_argument("--diffs-file", type=str, default=".", help="File containing the git diff of changes")
+parser.add_argument("--changed-files", nargs='*', help="List of changed files")
 args = parser.parse_args()
 
 if __name__ == "__main__":
@@ -164,4 +222,7 @@ if __name__ == "__main__":
             parser.print_help()
 
     client = OpenAI()
-    generate_docs(client, args.start_path, dirs_to_skip)
+    if args.changed_files and args.diffs_file:
+        update_docs(client, args.changed_files, args.diffs_file)
+    else:
+        generate_docs(client, args.start_path, dirs_to_skip)
