@@ -3,14 +3,7 @@ name: Document Changed Source Files
 # Run on all pull_request related events
 on:
   workflow_dispatch:
-    inputs:
-      openaikey:
-          description: 'OpenAI key for connection'
-          required: false
-          default: 'openai-key'
   push:
-    paths:
-      - src/**
     branches: [ main ]  # or any other branch you want to target
   pull_request:
     branches: [ main ]  # or any other branch you want to target
@@ -79,6 +72,13 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
+      
+      - name: Check if secret is set
+        run: |
+          if [ -z "${{ secrets.OPENAI_API_KEY }}" ]; then
+              echo "Error: OPENAI_API_KEY is not set. A valid OPENAI_API_KEY must be set as github secret to run this workflow"
+              exit 1
+          fi
 
       - name: Set up Python
         uses: actions/setup-python@v2

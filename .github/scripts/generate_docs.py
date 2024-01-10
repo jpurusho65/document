@@ -6,12 +6,10 @@ from openai import OpenAI
 # Map of languages to their file extensions
 language_extensions = {
     "python": [".py"],
-    "javascript": [".js"],
-    "typescript": [".tsx"],
+    "javascript": [".js", ".jsx"],
+    "typescript": [".ts", ".tsx"],
     # Add more languages and extensions as needed
 }
-
-dirs_to_skip = ['.git', '.github']
 
 def guess_language_based_on_extension(file_path, language_extensions):
     """
@@ -35,8 +33,8 @@ def guess_language_based_on_extension(file_path, language_extensions):
         if ext in extensions:
             return language
 
-    # Return None or a default value if no match is found
-    return None 
+	# Raise value error to gracefully exit the github action workflow calling this script
+    raise ValueError(f"Unsupport file type {ext} for documentation")
 
 
 def remove_code_block_formatting(original_content):
@@ -86,7 +84,7 @@ def select_prompt(language):
             remains unchanged, and only the comments are added or updated. Do not 
             modify any code logic, structure, or import statements. Ensure that the 
             output does not include markdown code block ticks (```). Do not drop or
-            omit any of the original code. The code is as follows::###
+            omit any of the original code. The code is as follows:###
             """,
         "javascript": """
             ### Please generate documentation for the following JavaScript/TypeScript source code
@@ -94,7 +92,7 @@ def select_prompt(language):
             remains unchanged, and only the comments are added or updated. Do not 
             modify any code logic, structure, or import statements. Ensure that the 
             output does not include markdown code block ticks (```). Do not drop or
-            omit any of the original code. The code is as follows::###
+            omit any of the original code. The code is as follows:###
             """,
         "typescript": """
             ### Please generate documentation for the following JavaScript/TypeScript source code
@@ -102,7 +100,7 @@ def select_prompt(language):
             remains unchanged, and only the comments are added or updated. Do not 
             modify any code logic, structure, or import statements. Ensure that the 
             output does not include markdown code block ticks (```). Do not drop or
-            omit any of the original code. The code is as follows::###
+            omit any of the original code. The code is as follows:###
             """
         # Add more languages and prompts as needed
     }
@@ -191,9 +189,12 @@ def get_documentation(client, file_path, prompt):
                     seed=100
             )
         return remove_code_block_formatting(response.choices[0].message.content)
+    else:
+        _ , ext = os.path.splitext(file_path) if file_path else ('', '')
+        print(f"Unsupported file type {ext} for documentation")
 
 
-def generate_docs(client, start_path, dirs_to_skip):
+def generate_docs(client, start_path):
     """
     Generate documentation for all files in a directory and its subdirectories.
 
@@ -206,7 +207,7 @@ def generate_docs(client, start_path, dirs_to_skip):
     """
     extensions = list(itertools.chain.from_iterable(language_extensions.values()))
     for subdir, dirs, files in os.walk(start_path):
-        dirs[:] = [d for d in dirs if d not in dirs_to_skip]
+        dirs[:] = [d for d in dirs if not d.startswith('.')]
         for file in files:
             if any(file.endswith(ext) for ext in extensions):
                 filepath = os.path.join(subdir, file)
@@ -234,7 +235,6 @@ def update_docs(client, changed_files, git_diff_file):
     
 # Command line argument parsing
 parser = argparse.ArgumentParser(description="Generate Documentation")
-parser.add_argument("--openai-key", type=str, default="", help="OpenAI Key")
 parser.add_argument("--start-path", type=str, default=".", help="The start path for processing (default: current directory)")
 parser.add_argument("--diffs-file", type=str, default=None, help="File containing the git diff of changes")
 parser.add_argument("--changed-files", type=str, default=None,  help="Text file containing changed files")
@@ -250,10 +250,8 @@ if __name__ == "__main__":
     """
     start_path = args.start_path
     if not os.environ.get('OPENAI_API_KEY'):
-        if args.openai_key:
-            os.environ['OPENAI_API_KEY'] = args.openai_key
-        else:
-            parser.print_help()
+        print("OPENAI_API_KEY environment variable must be set to run this script")
+        exit(1) 
 
     client = OpenAI()
     if args.changed_files and args.diffs_file:
@@ -262,4 +260,4 @@ if __name__ == "__main__":
         changed_file_list = [line.strip() for line in content]
         update_docs(client, changed_file_list, args.diffs_file)
     else:
-        generate_docs(client, args.start_path, dirs_to_skip)
+        generate_docs(client, args.start_path)
