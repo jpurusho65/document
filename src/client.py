@@ -45,6 +45,11 @@ class MyWebsocketAndUploadProgram:
 
     @staticmethod
     def main():
+        """
+-        The main static method of MyWebsocketAndUploadProgram where the script execution begins. 
+-        It sets the url and file_path parameters and then calls the upload_file method, 
+-        afterwards it prints the server response.
+-        """
         server_url = "http://localhost:8000/upload-file/"  # Server url
         file_to_upload = "sample2.txt"  # File to be uploaded
 
