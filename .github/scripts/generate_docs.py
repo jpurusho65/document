@@ -34,7 +34,7 @@ def guess_language_based_on_extension(file_path, language_extensions):
             return language
 
 	# Raise value error to gracefully exit the github action workflow calling this script
-    raise ValueError(f"Unsupport file type {ext} for documentation")
+    raise ValueError(f"Unsupported file type {ext} for documentation")
 
 
 def remove_code_block_formatting(original_content):
@@ -211,7 +211,7 @@ def generate_docs(client, start_path):
         for file in files:
             if any(file.endswith(ext) for ext in extensions):
                 filepath = os.path.join(subdir, file)
-                print(f"Generating document for {filepath}")
+                print(f"Generating documentation for {filepath}")
                 language = guess_language_based_on_extension(filepath, language_extensions)
                 prompt = select_prompt(language)
                 document = get_documentation(client, filepath, prompt)
@@ -226,7 +226,7 @@ def update_docs(client, changed_files, git_diff_file):
         with open(git_diff_file, "r") as gd:
             diffs = gd.readlines()
         prompt = select_prompt_for_diffs(language, diffs)
-        print(f"Updating document for {cf}")
+        print(f"Updating documentation for {cf}")
         document = get_documentation(client, cf, prompt)
         if document:
             with open(cf, "w") as file:
