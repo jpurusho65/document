@@ -63,15 +63,6 @@ async def upload_file(file: UploadFile = File(...)):
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
-    """
-    Handles WebSocket connections at the "/ws" URL.
-    
-    This method continuously receives data through the WebSocket, simulates processing the data,
-    and then sends a response back through the WebSocket.
-
-    Args:
-        websocket (WebSocket): The WebSocket connection object.
-    """
     await websocket.accept()
     while True:
         data = await websocket.receive_text()
