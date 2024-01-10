@@ -6,7 +6,7 @@ on:
     inputs:
       openaikey:
           description: 'OpenAI key for connection'
-          required: true
+          required: false
   push:
     paths:
       - src/**
@@ -100,6 +100,8 @@ jobs:
           name: changed_files
 
       - name: Update Source Documentation
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: python .github/scripts/generate_docs.py --openai-key ${{ github.event.inputs.openaikey }} --diffs git-diff-output --changed-files changed_files.txt
 
       - name: Create Pull Request
