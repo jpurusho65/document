@@ -11,6 +11,13 @@ language_extensions = {
     # Add more languages and extensions as needed
 }
 
+COST_PER_1K_TOKEN = 0.03
+token_count = 0
+
+# Calculate Cost
+def calculate_cost(total_tokens):
+    return (total_tokens / 1000) * COST_PER_1K_TOKEN
+
 def guess_language_based_on_extension(file_path, language_extensions):
     """
     Guess the programming language based on the file extension.
@@ -173,6 +180,7 @@ def get_documentation(client, file_path, prompt):
     Returns:
         str: The generated documentation for the file.
     """
+    global token_count
     # Load file content
     with open(file_path, 'r') as file:
         content = file.read()
@@ -188,6 +196,7 @@ def get_documentation(client, file_path, prompt):
                     temperature=0,
                     seed=100
             )
+        token_count += response.usage.total_tokens
         return remove_code_block_formatting(response.choices[0].message.content)
     else:
         _ , ext = os.path.splitext(file_path) if file_path else ('', '')
@@ -218,6 +227,7 @@ def generate_docs(client, start_path):
                 if document:
                     with open(filepath, "w") as file:
                         file.write(document)
+    print(f"Total completion tokens: {token_count}, Cost: ${calculate_cost(token_count):.2f}")
 
 
 def update_docs(client, changed_files, git_diff_file):
@@ -231,6 +241,7 @@ def update_docs(client, changed_files, git_diff_file):
         if document:
             with open(cf, "w") as file:
                 file.write(document)
+    print(f"Total completion tokens: {token_count}, Cost: ${calculate_cost(token_count):.2f}")
 
     
 # Command line argument parsing
